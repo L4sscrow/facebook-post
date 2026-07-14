@@ -1,10 +1,12 @@
 // ==UserScript==
 // @name         Facebook Post AI Generator
-// @namespace    https://lasscrow.local/facebook-post-ai
+// @namespace    https://github.com/L4sscrow
 // @version      1.0.0
 // @description  Génère automatiquement un post Facebook (texte 📸, lien, hashtags) via OpenRouter à partir d'une courte description.
 // @author       lasscrow
 // @match        https://www.facebook.com/*
+// @downloadURL  https://raw.githubusercontent.com/L4sscrow/facebook-post/main/facebook-post.user.js
+// @updateURL    https://raw.githubusercontent.com/L4sscrow/facebook-post/main/facebook-post.user.js
 // @grant        GM_xmlhttpRequest
 // @grant        GM_setValue
 // @grant        GM_getValue
