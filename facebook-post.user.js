@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Facebook Post AI Generator
 // @namespace    https://github.com/L4sscrow
-// @version      1.0.0
+// @version      1.1.0
 // @description  Génère automatiquement un post Facebook (texte 📸, lien, hashtags) via OpenRouter à partir d'une courte description.
 // @author       lasscrow
 // @match        https://www.facebook.com/*
@@ -252,7 +252,7 @@
       '- "text": 2 à 4 phrases engageantes qui donnent envie de voir le diaporama photo.',
       '  Le texte doit OBLIGATOIREMENT commencer par l\'emoji 📸 suivi d\'un espace, puis le texte',
       '  (pas de titre séparé, pas de guillemets). Ton chaleureux et local. Sans hashtags et sans lien.',
-      '- "hashtags": un tableau de 3 à 6 hashtags pertinents par rapport au sujet, en français,',
+      '- "hashtags": un tableau de 4 à 8 hashtags pertinents par rapport au sujet, en français,',
       '  au format "#motclé" (sans espace, sans accent si possible). Si la ville et/ou le département',
       '  concernés sont identifiables dans le sujet donné, ajoute-les OBLIGATOIREMENT sous forme de',
       '  hashtags (ex: "#Besancon", "#Doubs"). N\'inclus PAS ces hashtags, déjà ajoutés automatiquement : ' +
