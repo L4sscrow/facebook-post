@@ -18,7 +18,6 @@
 (function () {
   'use strict';
 
-  return;
 
   // ------------------------------------------------------------------
   // CONFIGURATION — à adapter
