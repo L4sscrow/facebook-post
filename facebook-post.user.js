@@ -282,6 +282,7 @@
           { role: 'user', content: userPrompt }
         ]
       }),
+      timeout: 30000,
       onload: function (res) {
         document.getElementById('fbpg-generate').disabled = false;
         handleGenerateResponse(res, link);
@@ -298,16 +299,26 @@
   }
 
   function handleGenerateResponse(res, link) {
-    if (res.status < 200 || res.status >= 300) {
-      setStatus(`Erreur OpenRouter (${res.status}). Vérifie ta clé API et le nom du modèle.`, 'error');
-      return;
-    }
-
-    let payload;
+    let payload = null;
     try {
       payload = JSON.parse(res.responseText);
     } catch (e) {
-      setStatus('Réponse OpenRouter illisible.', 'error');
+      // Pas forcément grave si le statut est OK sans corps JSON attendu, on gère plus bas.
+    }
+
+    if (res.status < 200 || res.status >= 300) {
+      setStatus(buildErrorMessage(res.status, payload, res.responseText), 'error');
+      return;
+    }
+
+    // Certains modèles/fournisseurs renvoient un statut 200 avec une erreur dans le corps.
+    if (payload && payload.error) {
+      setStatus(buildErrorMessage(res.status, payload, res.responseText), 'error');
+      return;
+    }
+
+    if (!payload) {
+      setStatus('Réponse OpenRouter illisible (pas du JSON valide).', 'error');
       return;
     }
 
@@ -331,6 +342,53 @@
     const finalText = assemblePost(parsed, link);
     document.getElementById('fbpg-result').value = finalText;
     setStatus('Post généré.', 'ok');
+  }
+
+  function buildErrorMessage(status, payload, rawText) {
+    // OpenRouter renvoie généralement { error: { message, code, ... } }.
+    const apiMessage = payload && payload.error && payload.error.message
+      ? String(payload.error.message).trim()
+      : '';
+
+    let hint;
+    switch (status) {
+      case 401:
+        hint = 'Clé API invalide, expirée ou révoquée.';
+        break;
+      case 402:
+        hint = 'Crédits insuffisants : soit ton compte OpenRouter n\'a plus de crédit, ' +
+          'soit cette clé API a une limite de dépense ("credit limit") atteinte pour ce modèle. ' +
+          'Vérifie sur openrouter.ai → Credits et → Keys.';
+        break;
+      case 403:
+        hint = 'Accès refusé : ce modèle nécessite peut-être une vérification de compte ' +
+          '(identité/modération) ou n\'est pas autorisé pour cette clé.';
+        break;
+      case 404:
+        hint = 'Modèle introuvable : vérifie que le nom du modèle est correct (ex: "openai/gpt-5.4-mini") et toujours disponible sur OpenRouter.';
+        break;
+      case 429:
+        hint = 'Trop de requêtes ou limite de débit (rate limit) atteinte. Réessaie dans quelques instants.';
+        break;
+      case 400:
+        hint = 'Requête invalide, souvent un nom de modèle mal orthographié ou un paramètre non supporté par ce modèle.';
+        break;
+      case 502:
+      case 503:
+        hint = 'Le fournisseur derrière ce modèle est momentanément indisponible ou surchargé. Réessaie, ou change de modèle.';
+        break;
+      default:
+        hint = 'Vérifie ta clé API et le nom du modèle.';
+    }
+
+    let msg = `Erreur OpenRouter (${status}). ${hint}`;
+    if (apiMessage) {
+      msg += ` — Détail : ${apiMessage}`;
+    } else if (!payload && rawText) {
+      const trimmed = rawText.trim().slice(0, 160);
+      if (trimmed) msg += ` — Réponse brute : ${trimmed}`;
+    }
+    return msg;
   }
 
   function extractJson(text) {
